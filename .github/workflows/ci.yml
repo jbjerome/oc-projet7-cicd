@@ -137,7 +137,7 @@ jobs:
       - name: build front image
         run: docker build -t microcrm-front:ci ./front
       - name: scan back
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: microcrm-back:ci
           format: sarif
@@ -145,7 +145,7 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
       - name: scan front
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: microcrm-front:ci
           format: sarif
