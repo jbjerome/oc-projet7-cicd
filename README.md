@@ -153,6 +153,26 @@ Aucun secret n'est requis pour `ci.yml` dans sa version actuelle. `cd.yml` et `r
 
 L'intégration SonarQube Cloud (à activer ultérieurement) nécessitera un `SONAR_TOKEN` dans les secrets du repo.
 
+### Monitoring (ELK)
+
+Stack ELK autonome (non intégrée au CI/CD car trop lourde) pour visualiser les logs applicatifs du back.
+
+```shell
+# 1. Lancer la stack ELK (Elasticsearch, Logstash, Kibana)
+docker compose -f docker-compose-elk.yml up -d
+
+# 2. Lancer l'application connectée à ELK
+docker compose -f docker-compose.yml -f docker-compose-monitoring.yml up --build -d
+```
+
+- Kibana : http://localhost:5601
+- Elasticsearch : http://localhost:9200
+- Index créé par Logstash : `microcrm-YYYY.MM.dd`
+
+Dans Kibana, créer un **Data View** sur le pattern `microcrm-*` (champ time : `@timestamp`) pour explorer les logs et construire un dashboard.
+
+Prévoir ~4 Go de RAM libres pour la stack.
+
 ### Versioning
 
 Politique SemVer (`MAJOR.MINOR.PATCH`). Une release se déclenche par la création d'un tag :

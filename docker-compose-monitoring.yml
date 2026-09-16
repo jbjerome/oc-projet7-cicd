@@ -1,0 +1,11 @@
+services:
+  back:
+    environment:
+      LOGSTASH_HOST: logstash:5000
+    networks:
+      - default
+      - elk
+
+networks:
+  elk:
+    external: true
