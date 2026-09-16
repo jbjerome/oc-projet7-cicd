@@ -1,0 +1,19 @@
+services:
+  back:
+    build:
+      context: ./back
+    container_name: microcrm-back
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  front:
+    build:
+      context: ./front
+    container_name: microcrm-front
+    ports:
+      - "80:8080"
+    depends_on:
+      back:
+        condition: service_healthy
+    restart: unless-stopped
