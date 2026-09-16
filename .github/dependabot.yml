@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /back
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /front
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker
+    directory: /back
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Paris
+
+  - package-ecosystem: docker
+    directory: /front
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Paris
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Paris
