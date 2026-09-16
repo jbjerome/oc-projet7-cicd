@@ -106,50 +106,58 @@ cd back
 ./gradlew test
 ```
 
-### Images Docker
+### Docker
 
-#### Client
+Chaque service a son propre `Dockerfile` (multi-stage, images Alpine minimales, utilisateur non-root, `HEALTHCHECK`). Un `docker-compose.yml` à la racine orchestre les deux.
 
-##### Construire l'image
-
-```shell
-docker build --target front -t orion-microcrm-front:latest .
-```
-
-##### Exécuter l'image
+#### Démarrer l'application complète
 
 ```shell
-docker run -it --rm -p 80:80 -p 443:443 orion-microcrm-front:latest
+docker compose up --build
 ```
 
-L'application sera disponible sur https://localhost.
+- Front (nginx) : http://localhost
+- API back : http://localhost:8080/persons
 
-#### Serveur
+Le front est configuré pour attendre que le back soit `healthy` avant de démarrer.
 
-##### Construire l'image
+#### Construire une seule image
 
 ```shell
-docker build --target back -t orion-microcrm-back:latest .
+docker build -t microcrm-back:local ./back
+docker build -t microcrm-front:local ./front
 ```
 
-##### Exécuter l'image
+#### Images publiées
+
+Sur chaque push `main`, les images sont publiées sur GHCR :
+
+- `ghcr.io/jbjerome/microcrm-back:latest` (+ `sha-<commit>`)
+- `ghcr.io/jbjerome/microcrm-front:latest` (+ `sha-<commit>`)
+
+Sur chaque tag `vX.Y.Z`, les mêmes images sont taguées `vX.Y.Z`, `X.Y`, `X`.
+
+## CI/CD
+
+Trois workflows GitHub Actions dans `.github/workflows/` :
+
+| Workflow | Déclencheur | Rôle |
+|---|---|---|
+| `ci.yml` | push, pull_request, cron lundi 06:00 UTC | Build back (Gradle + JaCoCo), build front (Karma + coverage + `ng build`), smoke test via `docker compose`, scan Trivy des images |
+| `cd.yml` | push sur `main` | Build & push images sur GHCR (tags `latest` + `sha-<commit>`) |
+| `release.yml` | push d'un tag `vX.Y.Z` | Build artefacts (JAR + `dist.zip`), push images tagées SemVer sur GHCR, création de la GitHub Release avec les artefacts attachés |
+
+### Secrets attendus
+
+Aucun secret n'est requis pour `ci.yml` dans sa version actuelle. `cd.yml` et `release.yml` utilisent le `GITHUB_TOKEN` fourni automatiquement par GitHub Actions (scope `packages:write` déjà autorisé dans `permissions:`).
+
+L'intégration SonarQube Cloud (à activer ultérieurement) nécessitera un `SONAR_TOKEN` dans les secrets du repo.
+
+### Versioning
+
+Politique SemVer (`MAJOR.MINOR.PATCH`). Une release se déclenche par la création d'un tag :
 
 ```shell
-docker run -it --rm -p 8080:8080 orion-microcrm-back:latest
+git tag v0.1.0
+git push origin v0.1.0
 ```
-
-L'API sera disponible sur http://localhost:8080.
-
-#### Tout en un
-
-```shell
-docker build --target standalone -t orion-microcrm-standalone:latest .
-```
-
-##### Exécuter l'image
-
-```shell
-docker run -it --rm -p 8080:8080 -p 80:80 -p 443:443 orion-microcrm-standalone:latest
-```
-
-L'application sera disponible sur https://localhost et l'API sur http://localhost:8080.
