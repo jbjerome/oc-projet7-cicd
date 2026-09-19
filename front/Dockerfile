@@ -7,7 +7,7 @@ RUN npm ci
 COPY . .
 RUN npx ng build --configuration production
 
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.31.6-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /src/dist/microcrm/browser /usr/share/nginx/html
 EXPOSE 8080
